@@ -382,6 +382,19 @@ function MCQContainer({ questions, studentName, questionFile = 'questions.json' 
         <div style={{ color: 'var(--error)', fontSize: '18px' }} className="bengali">
           রেন্ডারিং ত্রুটি: {error.message}
         </div>
+        <pre style={{
+          color: 'var(--error)',
+          fontSize: '12px',
+          textAlign: 'left',
+          marginTop: '8px',
+          overflow: 'auto',
+          maxWidth: '100%',
+          padding: '10px',
+          background: '#fee2e2',
+          borderRadius: '4px'
+        }}>
+          {error.stack}
+        </pre>
         <button onClick={() => window.location.reload()} className="bengali">
           রিফ্রেশ করুন
         </button>
