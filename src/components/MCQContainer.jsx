@@ -15,10 +15,11 @@ const STATUS = {
   SUBMITTED: 'SUBMITTED'
 }
 
-const DURATION_SECONDS = 18 * 60 // 18 minutes
+// Constants for calculation (not hardcoded exam values)
+const SECONDS_PER_QUESTION = 43.2 // 18 mins / 25 qs
 const MARK_PER_QUESTION = 1.25
 const NEGATIVE_MARKING = 0.25
-const PASS_MARK = 16.5
+const PASS_PERCENTAGE = 0.528 // 16.5 / 31.25
 
 function MCQContainer({ questions, studentName, questionFile = 'questions.json' }) {
   console.log('MCQContainer rendered:', {
@@ -28,12 +29,18 @@ function MCQContainer({ questions, studentName, questionFile = 'questions.json' 
     studentName
   })
 
+  // Dynamic calculations
+  const questionCount = questions?.length || 0
+  const duration = Math.ceil(questionCount * SECONDS_PER_QUESTION)
+  const totalMarks = questionCount * MARK_PER_QUESTION
+  const passMark = Math.ceil(totalMarks * PASS_PERCENTAGE * 100) / 100 // Round to 2 decimals
+
   // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
   const [status, setStatus] = useState(STATUS.RUNNING)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [answers, setAnswers] = useState({})
   const [visitedQuestions, setVisitedQuestions] = useState(new Set([0]))
-  const [timeLeft, setTimeLeft] = useState(DURATION_SECONDS)
+  const [timeLeft, setTimeLeft] = useState(duration)
   const [markedForReview, setMarkedForReview] = useState(new Set())
   const [examStartTime] = useState(Date.now()) // Track when exam started
   const [pendingSent, setPendingSent] = useState(false) // Track if pending status was sent
@@ -120,7 +127,7 @@ function MCQContainer({ questions, studentName, questionFile = 'questions.json' 
       attempted: scoreData.attempted,
       correct: scoreData.correct,
       wrong: scoreData.wrong,
-      pass: scoreData.score >= PASS_MARK,
+      pass: scoreData.score >= passMark,
       questionFile: questionFile
     }
 
@@ -145,7 +152,7 @@ function MCQContainer({ questions, studentName, questionFile = 'questions.json' 
       console.error('Submission error:', err)
       // Don't remove anything - let retry mechanism handle it
     })
-  }, [status, studentName, answers, questions, calculateScore, questionFile])
+  }, [status, timeLeft, handleSubmit, studentName, answers, questions, calculateScore, questionFile, passMark])
 
   // All useEffect hooks must be called before any returns
   useEffect(() => {
@@ -158,14 +165,14 @@ function MCQContainer({ questions, studentName, questionFile = 'questions.json' 
         setAnswers(data.answers || {})
         const maxIndex = Math.max(0, questions.length - 1)
         setCurrentQuestionIndex(Math.min(data.currentIndex || 0, maxIndex))
-        setTimeLeft(data.timeLeft ?? DURATION_SECONDS)
+        setTimeLeft(data.timeLeft ?? duration)
         setVisitedQuestions(new Set(data.visited || [0]))
         setMarkedForReview(new Set(data.marked || []))
       } catch (e) {
         console.error('Failed to load saved state', e)
       }
     }
-  }, [studentName, questions])
+  }, [studentName, questions, duration])
 
   useEffect(() => {
     if (status === STATUS.RUNNING) {
@@ -300,6 +307,8 @@ function MCQContainer({ questions, studentName, questionFile = 'questions.json' 
         onRestart={() => window.location.reload()}
         questionFile={questionFile}
         submissionStatus={submissionStatus}
+        passMark={passMark}
+        totalMarks={totalMarks}
       />
     )
   }

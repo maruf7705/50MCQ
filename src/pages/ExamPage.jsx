@@ -129,9 +129,23 @@ function ExamPage() {
   }
 
   if (!studentName) {
-    return <StartScreen onStart={(name) => {
-      setStudentName(name)
-    }} />
+    // Calculate stats for Start Screen
+    const questionCount = questions.length
+    const SECONDS_PER_QUESTION = 43.2
+    const MARK_PER_QUESTION = 1.25
+    const PASS_PERCENTAGE = 0.528
+
+    const duration = Math.ceil(questionCount * SECONDS_PER_QUESTION)
+    const totalMarks = questionCount * MARK_PER_QUESTION
+    const passMark = Math.ceil(totalMarks * PASS_PERCENTAGE * 100) / 100
+
+    return <StartScreen
+      onStart={(name) => setStudentName(name)}
+      totalQuestions={questionCount}
+      duration={duration}
+      totalMarks={totalMarks}
+      passMark={passMark}
+    />
   }
 
   console.log('ExamPage rendering MCQContainer:', {
