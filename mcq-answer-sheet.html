@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>MCQ Sheet – 200</title>
+<style>
+@page { size: A4 portrait; margin: 5mm 4mm; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: Arial, sans-serif;
+  background: #eee;
+}
+
+/* ── print toolbar (screen only) ── */
+.bar {
+  position: sticky; top: 0; z-index: 9;
+  background: #111; color: #fff;
+  display: flex; align-items: center; gap: 14px;
+  padding: 8px 16px; font-size: 13px;
+}
+.bar button {
+  background: #4caf50; color: #fff; border: none;
+  padding: 7px 20px; border-radius: 4px;
+  font-weight: 700; cursor: pointer; font-size: 13px;
+}
+
+/* ── page ── */
+.page {
+  width: 210mm; min-height: 297mm;
+  margin: 12px auto; background: #fff;
+  padding: 4mm 3.5mm;
+  box-shadow: 0 0 8px rgba(0,0,0,.15);
+}
+
+/* ── grid: 8 columns table ── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+/* each "block" = a pair of columns (number + bubbles) */
+td, th {
+  border: .5px solid #bbb;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 9px;
+  padding: 2.2px 1px;
+  line-height: 1;
+}
+
+/* number cell */
+.qn {
+  width: 18px;
+  font-weight: 700;
+  font-size: 9px;
+  color: #000;
+  background: #f4f4f4;
+  border-right: none;
+}
+
+/* bubble cell */
+.bc {
+  border-left: none;
+  padding: 1.8px 2px;
+}
+
+/* column group divider */
+.qn.dv { border-left: 1.5px solid #333; }
+
+/* bubbles */
+.bs { display: flex; justify-content: center; gap: 3px; }
+.b {
+  width: 13px; height: 13px;
+  border: 1.5px solid #222;
+  border-radius: 50%;
+  font-size: 7px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  color: #333;
+}
+
+/* every 5th row thicker line */
+tr.g5 td { border-bottom: 1.2px solid #555; }
+
+/* column headers */
+th {
+  background: #222; color: #fff;
+  font-size: 8px; font-weight: 700;
+  padding: 3px 0; letter-spacing: .3px;
+}
+th.dv { border-left: 1.5px solid #333; }
+
+@media print {
+  body { background: #fff; }
+  .bar { display: none !important; }
+  .page { box-shadow: none; margin: 0; width: 100%; min-height: auto; }
+  .qn { background: #f4f4f4 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  th { background: #222 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <span>⚡ 200 MCQ Sheet</span>
+  <button onclick="window.print()">🖨️ Print / PDF</button>
+</div>
+
+<div class="page">
+  <table id="T"></table>
+</div>
+
+<script>
+const TOTAL = 200;
+const COLS  = 8;
+const OPTS  = ['ক','খ','গ','ঘ'];
+const PER   = Math.ceil(TOTAL / COLS);      // 25
+
+const t = document.getElementById('T');
+
+// header row
+let hr = '<tr>';
+for (let c = 0; c < COLS; c++) {
+  const s = c * PER + 1;
+  const e = Math.min((c + 1) * PER, TOTAL);
+  const dv = c > 0 ? ' dv' : '';
+  hr += `<th class="qn${dv}" colspan="2">${s}–${e}</th>`;
+}
+hr += '</tr>';
+
+// data rows
+let rows = '';
+for (let r = 0; r < PER; r++) {
+  const is5 = (r + 1) % 5 === 0 && r !== PER - 1 ? ' class="g5"' : '';
+  rows += `<tr${is5}>`;
+  for (let c = 0; c < COLS; c++) {
+    const num = c * PER + r + 1;
+    if (num > TOTAL) {
+      const dv = c > 0 ? ' dv' : '';
+      rows += `<td class="qn${dv}"></td><td class="bc"></td>`;
+      continue;
+    }
+    const dv = c > 0 ? ' dv' : '';
+    rows += `<td class="qn${dv}">${num}</td>`;
+    rows += `<td class="bc"><div class="bs">`;
+    OPTS.forEach(o => { rows += `<span class="b">${o}</span>`; });
+    rows += `</div></td>`;
+  }
+  rows += '</tr>';
+}
+
+t.innerHTML = hr + rows;
+</script>
+</body>
+</html>
